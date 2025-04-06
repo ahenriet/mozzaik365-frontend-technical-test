@@ -63,22 +63,24 @@ export async function getUserById(token: string, id: string): Promise<GetUserByI
   }).then(res => checkStatus(res).json())
 }
 
+export type Meme = {
+  id: string;
+  authorId: string;
+  pictureUrl: string;
+  description: string;
+  commentsCount: string;
+  texts: {
+    content: string;
+    x: number;
+    y: number;
+  }[];
+  createdAt: string;
+}
+
 export type GetMemesResponse = {
   total: number;
   pageSize: number;
-  results: {
-    id: string;
-    authorId: string;
-    pictureUrl: string;
-    description: string;
-    commentsCount: string;
-    texts: {
-      content: string;
-      x: number;
-      y: number;
-    }[];
-    createdAt: string;
-  }[]
+  results: Meme[]
 }
 
 /**
@@ -96,17 +98,32 @@ export async function getMemes(token: string, page: number): Promise<GetMemesRes
   }).then(res => checkStatus(res).json())
 }
 
+export async function createMeme(token: string, formData: FormData): Promise<Meme> {
+  console.log("Creating meme", formData);
+  return await fetch(`${BASE_URL}/memes`, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+  }).then(res => checkStatus(res).json());
+}
+
+
+export type MemeComment = {
+  id: string;
+  authorId: string;
+  memeId: string;
+  content: string;
+  createdAt: string;
+};
+
 export type GetMemeCommentsResponse = {
   total: number;
   pageSize: number;
-  results: {
-    id: string;
-    authorId: string;
-    memeId: string;
-    content: string;
-    createdAt: string;
-  }[]
+  results: MemeComment[]
 }
+
 
 /**
  * Get comments for a meme

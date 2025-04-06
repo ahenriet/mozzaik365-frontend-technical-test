@@ -8,6 +8,7 @@ import {
   IconButton,
   Input,
   Textarea,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -15,6 +16,9 @@ import { MemeEditor } from "../../components/meme-editor";
 import { useMemo, useState } from "react";
 import { MemePictureProps } from "../../components/meme-picture";
 import { Plus, Trash } from "@phosphor-icons/react";
+import { useMutation } from "@tanstack/react-query";
+import { createMeme } from "../../api";
+import { useAuthToken } from "../../contexts/authentication";
 
 export const Route = createFileRoute("/_authentication/create")({
   component: CreateMemePage,
@@ -27,7 +31,52 @@ type Picture = {
 
 function CreateMemePage() {
   const [picture, setPicture] = useState<Picture | null>(null);
+  const [description, setDescription] = useState<string>("");
   const [texts, setTexts] = useState<MemePictureProps["texts"]>([]);
+  const token = useAuthToken();
+  const toast = useToast();
+
+  const { mutate } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      await createMeme(token, formData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Meme created",
+        description: "Your meme has been created successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setPicture(null);
+      setDescription("");
+      setTexts([]);
+      window.location.href = "/";
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (!picture) {
+      alert("Please upload a picture before submitting.");
+      return;
+    }
+    if (description.length === 0) {
+      alert("Please add a description before submitting.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("Picture", picture.file);
+    formData.append("Description", description);
+
+    texts.forEach((text, index) => {
+      formData.append(`Texts[${index}][Content]`, text.content);
+      formData.append(`Texts[${index}][X]`, Math.ceil(text.x).toString());
+      formData.append(`Texts[${index}][Y]`, Math.ceil(text.y).toString());
+    });
+    console.log("Submitting form data", formData);
+    mutate(formData);
+  };
 
   const handleDrop = (file: File) => {
     setPicture({
@@ -50,6 +99,15 @@ function CreateMemePage() {
   const handleDeleteCaptionButtonClick = (index: number) => {
     setTexts(texts.filter((_, i) => i !== index));
   };
+
+  const handleTextChange = (text: string, index: number) => {
+    const newTexts = [...texts];
+    newTexts[index] = {
+      ...newTexts[index],
+      content: text,
+    };
+    setTexts(newTexts);
+  }
 
   const memePicture = useMemo(() => {
     if (!picture) {
@@ -76,7 +134,10 @@ function CreateMemePage() {
             <Heading as="h2" size="md" mb={2}>
               Describe your meme
             </Heading>
-            <Textarea placeholder="Type your description here..." />
+            <Textarea placeholder="Type your description here..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
           </Box>
         </VStack>
       </Box>
@@ -93,8 +154,8 @@ function CreateMemePage() {
         <Box p={4} flexGrow={1} height={0} overflowY="auto">
           <VStack>
             {texts.map((text, index) => (
-              <Flex width="full">
-                <Input key={index} value={text.content} mr={1} />
+              <Flex key={index} width="full">
+                <Input value={text.content} mr={1} onChange={e => handleTextChange(e.target.value, index)} />
                 <IconButton
                   onClick={() => handleDeleteCaptionButtonClick(index)}
                   aria-label="Delete caption"
@@ -132,6 +193,7 @@ function CreateMemePage() {
             width="full"
             color="white"
             isDisabled={memePicture === undefined}
+            onClick={handleSubmit}
           >
             Submit
           </Button>

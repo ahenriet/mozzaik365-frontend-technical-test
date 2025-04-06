@@ -4,6 +4,7 @@ import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { AuthenticationContext } from "../../../contexts/authentication";
 import { MemeFeedPage } from "../../../routes/_authentication/index";
 import { renderWithRouter } from "../../utils";
+import { fireEvent } from "@testing-library/react";
 
 describe("routes/_authentication/index", () => {
   describe("MemeFeedPage", () => {
@@ -65,6 +66,7 @@ describe("routes/_authentication/index", () => {
         expect(screen.getByTestId("meme-comments-count-dummy_meme_id_1")).toHaveTextContent('3 comments');
         
         // We check that the right comments with the right authors are displayed
+        screen.getByTestId("meme-comments-section-dummy_meme_id_1").click(); // with my changes, we now have to click on the comment section to load the comments
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy comment 1');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy_user_1');
 
@@ -73,6 +75,17 @@ describe("routes/_authentication/index", () => {
         
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_3")).toHaveTextContent('dummy comment 3');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_3")).toHaveTextContent('dummy_user_3');
+      
+        // We add a comment and check that it is displayed
+        // Add a new comment
+        fireEvent.change(screen.getByTestId("meme-comment-input-dummy_meme_id_1"), { target: { value: "new dummy comment" } });
+        fireEvent.submit(screen.getByTestId("meme-comment-input-dummy_meme_id_1"));
+
+        
+        // // Check that the new comment is displayed
+        expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('dummy comment 4');
+        expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('dummy_user_2');
+
       });
     });
   });

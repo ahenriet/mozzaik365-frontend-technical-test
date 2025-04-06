@@ -109,4 +109,22 @@ export const handlers = [
       });
     },
   ),
+  http.post<{ memeId: string }, { content: string }>(
+    "https://fetestapi.int.mozzaik365.net/api/memes/:memeId/comments",
+    async ({ params, request }) => {
+      const { content } = await request.json();
+      if (!content) {
+        return new HttpResponse(null, { status: 400 });
+      }
+      const newComment = {
+        id: `dummy_comment_id_${comments.length + 1}`,
+        memeId: params.memeId,
+        authorId: "dummy_user_id_1",
+        content,
+        createdAt: new Date().toISOString(),
+      };
+      comments.push(newComment);
+      return HttpResponse.json(newComment, { status: 201 });
+    }
+  ),
 ];
