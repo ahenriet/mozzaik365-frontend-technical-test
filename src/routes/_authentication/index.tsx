@@ -9,6 +9,7 @@ import {
   LinkOverlay,
   StackDivider,
   Text,
+  useToast,
   VStack
 } from "@chakra-ui/react";
 import { CaretDown, CaretUp, Chat } from "@phosphor-icons/react";
@@ -37,19 +38,32 @@ type MemeWithAuthor = Meme & {
 export const MemeFeedPage: React.FC = () => {
   const queryClient = useQueryClient();
   const token = useAuthToken();
-  // const toast = useToast();
+  const toast = useToast();
   const [page, setPage] = useState(1);
   const [openedCommentSectionMemeId, setOpenedCommentSectionMemeId] = useState<string | null>(null);
 
+  const getCachedUserById = async (userId: string): Promise<GetUserByIdResponse> => {
+    const cachedUser = queryClient.getQueryData<GetUserByIdResponse>(["user", userId]);
+
+    // fetch user only if not cached
+    return cachedUser ||
+      (await queryClient.fetchQuery({
+        queryKey: ["user", userId],
+        queryFn: () => getUserById(token, userId)
+      }
+      ));
+  }
+
+  // fetch memes with authors
   const { isLoading, data: memesData, error } = useQuery({
     queryKey: ["memes", page],
     queryFn: async () => {
       const response = await getMemes(token, page);
 
-      // Fetch author for each meme in parallel
+      // fetch author for each meme in parallel and leverage Tanstack Query's cache
       const memesWithAuthors = await Promise.all(
         response.results.map(async (meme) => {
-          const author = await getUserById(token, meme.authorId);
+          const author = await getCachedUserById(meme.authorId);
           return { ...meme, author };
         })
       );
@@ -58,16 +72,17 @@ export const MemeFeedPage: React.FC = () => {
     },
   });
 
+  // fetch comments for the opened comment section meme
   const { data: commentsData } = useQuery({
     queryKey: ["comments", openedCommentSectionMemeId],
     queryFn: async () => {
       const response = await getMemeComments(token, openedCommentSectionMemeId!, 1); // openedCommentSectionMemeId is never null thanks to the enabled option
 
       console.log("commentsData", response);
-      // fetch author for each comment in parallel 
+      // fetch author for each comment in parallel and leverage Tanstack Query's cache
       const commentsWithAuthors = await Promise.all(
         response.results.map(async (comment) => {
-          const author = await getUserById(token, comment.authorId);
+          const author = await getCachedUserById(comment.authorId);
           return { ...comment, author };
         }));
       return { ...response, results: commentsWithAuthors };
@@ -75,11 +90,7 @@ export const MemeFeedPage: React.FC = () => {
     enabled: !!openedCommentSectionMemeId,  // load comments only when a comment section is opened
   });
 
-  const handleLoadMore = useCallback(() => {
-    setPage(page + 1);
-  }, []);
-
-  // fetch logged in user TODO move to comment section?
+  // fetch logged in user 
   const { data: loggedInUser } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
@@ -93,70 +104,53 @@ export const MemeFeedPage: React.FC = () => {
       return await createMemeComment(token, data.memeId, data.content);
     },
     onMutate: async (newComment) => {
-      // Cancel any outgoing refetches for comments for the current meme
+      // cancel any outgoing refetches for comments for the current meme
       await queryClient.cancelQueries({ queryKey: ["comments", newComment.memeId] });
 
-      // Snapshot the previous comments for the current meme
+      // snapshot the previous comments for the current meme to rollback in case of an error
       const previousComments = queryClient.getQueryData(["comments", newComment.memeId]);
 
-      // Optimistically update the comments in the cache
+      // optimistically update the comments in the cache
       queryClient.setQueryData(["comments", newComment.memeId], (old: any) => {
-        console.log("loggedInUser", loggedInUser);
-        const optimisticComments = {
+        return {
           ...old,
-          total: (old?.total || 0) + 1, // Increment the total count of comments
+          total: (old?.total || 0) + 1, // increment the total count of comments
           results: [
             {
-              id: `temp-${Date.now()}`, // Temporary ID for the new comment, will be overwritten by the refetch in onSettled
               content: newComment.content,
               author: loggedInUser,
               createdAt: new Date().toISOString(),
             },
             ...(old?.results || []),
           ],
-        };
-        console.log("optimisticComments", optimisticComments);
-        return optimisticComments
+        }
       });
 
-      console.log("previousComments", previousComments);
-      // Return the snapshot to rollback in case of an error
+      // return the snapshot to rollback in case of an error
       return { previousComments };
     },
     onError: (_error, newComment, context) => {
-      // Rollback to the previous comments in case of an error
+      // rollback to the previous comments
       queryClient.setQueryData(["comments", newComment.memeId], context?.previousComments);
 
-      // Optionally, show an error toast
-      // toast({
-      //   title: "Error adding comment",
-      //   description: error instanceof Error ? error.message : "Please try again later",
-      //   status: "error",
-      //   duration: 5000,
-      // });
+      toast({
+        title: "Your comment could not be added",
+        description: error instanceof Error ? error.message : "Please try again later",
+        status: "error",
+        duration: 5000,
+      });
     },
     onSettled: (newComment) => {
-      // Refetch the comments to ensure the cache is up-to-date
+      // refetch the comments to ensure the cache is up-to-date
       if (newComment) {
         queryClient.invalidateQueries({ queryKey: ["comments", newComment.memeId] });
       }
     },
   });
-  // onSuccess: () => {
-  //   toast({
-  //     title: "Comment added successfully",
-  //     status: "success",
-  //     duration: 3000,
-  //   });
-  // },
-  // onError: (error) => {
-  //   toast({
-  //     title: "Error adding comment",
-  //     description: error instanceof Error ? error.message : "Please try again later",
-  //     status: "error",
-  //     duration: 5000,
-  //   });
-  // },
+
+  const handleLoadMore = useCallback(() => {
+    setPage(page + 1);
+  }, []);
 
   if (isLoading && !memesData) {
     return <Loader data-testid="meme-feed-loader" />;

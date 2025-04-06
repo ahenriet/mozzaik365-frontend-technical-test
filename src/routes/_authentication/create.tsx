@@ -51,7 +51,15 @@ function CreateMemePage() {
       setPicture(null);
       setDescription("");
       setTexts([]);
-      window.location.href = "/";
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error creating meme",
+        description: error.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     },
   });
 
