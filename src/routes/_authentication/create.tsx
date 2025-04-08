@@ -91,6 +91,9 @@ function CreateMemePage() {
       url: URL.createObjectURL(file),
       file,
     });
+    // also reset the description and captions
+    setDescription("");
+    setTexts([]);
   };
 
   const handleAddCaptionButtonClick = () => {
@@ -117,6 +120,16 @@ function CreateMemePage() {
     setTexts(newTexts);
   }
 
+  const handleTextPositionChange = (index: number, x: number, y: number) => {
+    const newTexts = [...texts];
+    newTexts[index] = {
+      ...newTexts[index],
+      x: x,
+      y: y,
+    };
+    setTexts(newTexts);
+  }
+
   const memePicture = useMemo(() => {
     if (!picture) {
       return undefined;
@@ -125,6 +138,8 @@ function CreateMemePage() {
     return {
       pictureUrl: picture.url,
       texts,
+      isDraggable: true,
+      onTextPositionChange: handleTextPositionChange
     };
   }, [picture, texts]);
 

@@ -67,6 +67,7 @@ export const MemeEditor: React.FC<MemeEditorProps> = ({
     },
     noClick: memePicture !== undefined,
     accept: { "image/png": [".png"], "image/jpg": [".jpg"] },
+    multiple: false,
   });
 
   return (

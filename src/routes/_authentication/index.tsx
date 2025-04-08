@@ -24,14 +24,14 @@ import {
   getMemes,
   getUserById,
   GetUserByIdResponse,
-  Meme
+  MemeResponse
 } from "../../api";
 import { CommentSection } from "../../components/comment-section";
 import { Loader } from "../../components/loader";
 import { MemePicture } from "../../components/meme-picture";
 import { useAuthToken } from "../../contexts/authentication";
 
-type MemeWithAuthor = Meme & {
+type MemeWithAuthor = MemeResponse & {
   author: GetUserByIdResponse;
 };
 
@@ -189,11 +189,9 @@ export const MemeFeedPage: React.FC = () => {
                 {format(meme.createdAt)}
               </Text>
             </Flex>
-            <MemePicture pictureUrl={meme.pictureUrl} texts={meme.texts} dataTestId={`meme-picture-${meme.id}`} />
+            <MemePicture pictureUrl={meme.pictureUrl} texts={meme.texts} dataTestId={`meme-picture-${meme.id}`} isDraggable={false} />
             <Box>
-              <Text fontWeight="bold" fontSize="medium" mb={2}>
-                Description:{" "}
-              </Text>
+              <Text fontWeight="bold" fontSize="medium" mb={2}> Description:{" "} </Text>
               <Box
                 p={2}
                 borderRadius={8}

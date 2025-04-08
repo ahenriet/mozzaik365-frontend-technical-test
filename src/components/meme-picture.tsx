@@ -1,5 +1,8 @@
-import { Box, Text, useDimensions } from "@chakra-ui/react";
+import { Box, useDimensions } from "@chakra-ui/react";
+// useDimensions is deprecated but the recommended useSize is not intended for public usage 
+// https://www.npmjs.com/package/@chakra-ui/react-use-size/v/0.0.0-dev-20220922115811?activeTab=readme
 import { useMemo, useRef } from "react";
+import { DraggableText } from "./draggable-text";
 
 export type MemePictureProps = {
   pictureUrl: string;
@@ -9,6 +12,8 @@ export type MemePictureProps = {
     y: number;
   }[];
   dataTestId?: string;
+  onTextPositionChange?: (index: number, x: number, y: number) => void;
+  isDraggable?: boolean;
 };
 
 const REF_WIDTH = 800;
@@ -18,7 +23,9 @@ const REF_FONT_SIZE = 36;
 export const MemePicture: React.FC<MemePictureProps> = ({
   pictureUrl,
   texts: rawTexts,
-  dataTestId = '',
+  dataTestId,
+  onTextPositionChange,
+  isDraggable = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const dimensions = useDimensions(containerRef, true);
@@ -40,6 +47,14 @@ export const MemePicture: React.FC<MemePictureProps> = ({
     };
   }, [boxWidth, rawTexts]);
 
+  const handleDrag = (index: number, _e: any, data: any) => {
+    if (onTextPositionChange) {
+      const scaledX = (data.x / boxWidth!) * REF_WIDTH;
+      const scaledY = (data.y / boxWidth!) * REF_WIDTH;
+      onTextPositionChange(index, scaledX, scaledY);
+    }
+  };
+
   return (
     <Box
       width="full"
@@ -56,22 +71,14 @@ export const MemePicture: React.FC<MemePictureProps> = ({
       data-testid={dataTestId}
     >
       {texts.map((text, index) => (
-        <Text
+        <DraggableText
           key={index}
-          position="absolute"
-          left={text.x}
-          top={text.y}
+          text={text}
           fontSize={fontSize}
-          color="white"
-          fontFamily="Impact"
-          fontWeight="bold"
-          userSelect="none"
-          textTransform="uppercase"
-          style={{ WebkitTextStroke: "1px black" }}
-          data-testid={`${dataTestId}-text-${index}`}
-        >
-          {text.content}
-        </Text>
+          isDraggable={isDraggable}
+          onDrag={(e, data) => handleDrag(index, e, data)}
+          dataTestId={`${dataTestId}-text-${index}`}
+        />
       ))}
     </Box>
   );

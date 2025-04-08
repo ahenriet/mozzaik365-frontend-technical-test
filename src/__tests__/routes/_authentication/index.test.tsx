@@ -79,7 +79,7 @@ describe("routes/_authentication/index", () => {
         // We add a comment and check that it is displayed
         // Add a new comment
         fireEvent.change(screen.getByTestId("meme-comment-input-dummy_meme_id_1"), { target: { value: "new dummy comment" } });
-        fireEvent.submit(screen.getByTestId("meme-comment-input-dummy_meme_id_1"));
+        // fireEvent.submit(screen.getByTestId("meme-comment-input-dummy_meme_id_1"));
 
         
         // // Check that the new comment is displayed

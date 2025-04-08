@@ -63,7 +63,7 @@ export async function getUserById(token: string, id: string): Promise<GetUserByI
   }).then(res => checkStatus(res).json())
 }
 
-export type Meme = {
+export type MemeResponse = {
   id: string;
   authorId: string;
   pictureUrl: string;
@@ -80,7 +80,7 @@ export type Meme = {
 export type GetMemesResponse = {
   total: number;
   pageSize: number;
-  results: Meme[]
+  results: MemeResponse[]
 }
 
 /**
@@ -98,7 +98,7 @@ export async function getMemes(token: string, page: number): Promise<GetMemesRes
   }).then(res => checkStatus(res).json())
 }
 
-export async function createMeme(token: string, formData: FormData): Promise<Meme> {
+export async function createMeme(token: string, formData: FormData): Promise<MemeResponse> {
   console.log("Creating meme", formData);
   return await fetch(`${BASE_URL}/memes`, {
     method: 'POST',
