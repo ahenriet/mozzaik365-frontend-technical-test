@@ -18,7 +18,6 @@ export const DraggableText: React.FC<{
 			userSelect="none"
 			textTransform="uppercase"
 			style={{ WebkitTextStroke: "1px black", cursor: isDraggable ? "move" : "default" }}
-			data-testid={dataTestId}
 		>
 			{text.content}
 		</Text>
@@ -33,7 +32,7 @@ export const DraggableText: React.FC<{
 	}
 
 	return (
-		<Box position="absolute" left={`${text.x}px`} top={`${text.y}px`}>
+		<Box position="absolute" left={`${text.x}px`} top={`${text.y}px`} data-testid={dataTestId}>
 			{textElement}
 		</Box>
 	);

@@ -10,13 +10,13 @@ import {
 
 export type AuthenticationState =
   | {
-      isAuthenticated: true;
-      token: string;
-      userId: string;
-    }
+    isAuthenticated: true;
+    token: string;
+    userId: string;
+  }
   | {
-      isAuthenticated: false;
-    };
+    isAuthenticated: false;
+  };
 
 export type Authentication = {
   state: AuthenticationState;
@@ -28,26 +28,39 @@ export const AuthenticationContext = createContext<Authentication | undefined>(
   undefined,
 );
 
+const isTokenValid = (token: string): boolean => {
+  try {
+    const { exp } = jwtDecode<{ exp: number }>(token);
+    return Date.now() < exp * 1000;
+  } catch {
+    return false;
+  }
+};
+
 export const AuthenticationProvider: React.FC<PropsWithChildren> = ({
   children,
 }) => {
-  const [state, setState] = useState<AuthenticationState>({
-    isAuthenticated: false,
+  const [state, setState] = useState<AuthenticationState>(() => {
+    const token = localStorage.getItem("authToken");
+    if (token && isTokenValid(token)) {
+      const userId = jwtDecode<{ id: string }>(token).id;
+      return { isAuthenticated: true, token, userId };
+    }
+    return { isAuthenticated: false };
   });
 
   const authenticate = useCallback(
     (token: string) => {
-      setState({
-        isAuthenticated: true,
-        token,
-        userId: jwtDecode<{ id: string }>(token).id,
-      });
+      const userId = jwtDecode<{ id: string }>(token).id;
+      setState({ isAuthenticated: true, token, userId });
+      localStorage.setItem("authToken", token); // Persist token
     },
     [setState],
   );
 
   const signout = useCallback(() => {
     setState({ isAuthenticated: false });
+    localStorage.removeItem("authToken"); // Clear token
   }, [setState]);
 
   const contextValue = useMemo(

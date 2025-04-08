@@ -24,7 +24,7 @@ export const CommentSection: React.FC<{
 
 	return (
 		<Box mb={6}>
-			<form onSubmit={handleSubmit}>
+			<form onSubmit={handleSubmit} data-testid={`meme-comment-form-${memeId}`}>
 				<Flex alignItems="center">
 					<Avatar
 						borderWidth="1px"

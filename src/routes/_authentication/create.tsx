@@ -48,9 +48,10 @@ function CreateMemePage() {
         duration: 3000,
         isClosable: true,
       });
-      setPicture(null);
-      setDescription("");
-      setTexts([]);
+      // setPicture(null); TODO remove when redirection works
+      // setDescription("");
+      // setTexts([]);
+      window.location.href = "/";
     },
     onError: (error: any) => {
       toast({

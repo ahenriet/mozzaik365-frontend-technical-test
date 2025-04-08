@@ -21,8 +21,8 @@ describe("routes/_authentication/index", () => {
                     userId: "dummy_user_id",
                     token: "dummy_token",
                   },
-                  authenticate: () => {},
-                  signout: () => {},
+                  authenticate: () => { },
+                  signout: () => { },
                 }}
               >
                 {children}
@@ -33,13 +33,13 @@ describe("routes/_authentication/index", () => {
       });
     }
 
-    it("should fetch the memes and display them with their comments", async () => {
+    it("should fetch the memes, display them with their comments and add a comment", async () => {
       renderMemeFeedPage();
 
       await waitFor(() => {
         // We check that the right author's username is displayed
         expect(screen.getByTestId("meme-author-dummy_meme_id_1")).toHaveTextContent('dummy_user_1');
-        
+
         // We check that the right meme's picture is displayed
         expect(screen.getByTestId("meme-picture-dummy_meme_id_1")).toHaveStyle({
           'background-image': 'url("https://dummy.url/meme/1")',
@@ -61,31 +61,32 @@ describe("routes/_authentication/index", () => {
 
         // We check that the right description is displayed
         expect(screen.getByTestId("meme-description-dummy_meme_id_1")).toHaveTextContent('dummy meme 1');
-        
+
         // We check that the right number of comments is displayed
         expect(screen.getByTestId("meme-comments-count-dummy_meme_id_1")).toHaveTextContent('3 comments');
-        
+
         // We check that the right comments with the right authors are displayed
-        screen.getByTestId("meme-comments-section-dummy_meme_id_1").click(); // with my changes, we now have to click on the comment section to load the comments
+        fireEvent.click(screen.getByTestId("meme-comments-section-dummy_meme_id_1")); // with my changes, we now have to click on the comment section to load the comments
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy comment 1');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_1")).toHaveTextContent('dummy_user_1');
 
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_2")).toHaveTextContent('dummy comment 2');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_2")).toHaveTextContent('dummy_user_2');
-        
+
         expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_3")).toHaveTextContent('dummy comment 3');
         expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_3")).toHaveTextContent('dummy_user_3');
-      
-        // We add a comment and check that it is displayed
-        // Add a new comment
+      });
+
+      // We add a comment
+      await waitFor(() => {
         fireEvent.change(screen.getByTestId("meme-comment-input-dummy_meme_id_1"), { target: { value: "new dummy comment" } });
-        // fireEvent.submit(screen.getByTestId("meme-comment-input-dummy_meme_id_1"));
+        fireEvent.submit(screen.getByTestId("meme-comment-form-dummy_meme_id_1"));
+      });
 
-        
-        // // Check that the new comment is displayed
-        expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('dummy comment 4');
-        expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('dummy_user_2');
-
+      await waitFor(() => {
+        // And check that the new comment is displayed
+        expect(screen.getByTestId("meme-comment-content-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('new dummy comment');
+        expect(screen.getByTestId("meme-comment-author-dummy_meme_id_1-dummy_comment_id_4")).toHaveTextContent('dummy_user_1');
       });
     });
   });

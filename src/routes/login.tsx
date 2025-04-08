@@ -19,7 +19,7 @@ type SearchParams = {
 };
 
 type Inputs = {
-  username: string;
+username: string;
   password: string;
 };
 
