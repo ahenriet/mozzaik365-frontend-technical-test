@@ -1,4 +1,5 @@
 import { Box, Text } from "@chakra-ui/react";
+import { useRef } from "react";
 import Draggable from "react-draggable";
 
 export const DraggableText: React.FC<{
@@ -8,6 +9,7 @@ export const DraggableText: React.FC<{
 	onDrag?: (e: any, data: any) => void;
 	dataTestId: string;
 }> = ({ text, fontSize, isDraggable = true, onDrag, dataTestId }) => {
+	const nodeRef = useRef(null);
 	const textElement = (
 		<Text
 			position="absolute"
@@ -18,6 +20,7 @@ export const DraggableText: React.FC<{
 			userSelect="none"
 			textTransform="uppercase"
 			style={{ WebkitTextStroke: "1px black", cursor: isDraggable ? "move" : "default" }}
+			ref={nodeRef}
 		>
 			{text.content}
 		</Text>
@@ -25,7 +28,7 @@ export const DraggableText: React.FC<{
 
 	if (isDraggable) {
 		return (
-			<Draggable position={{ x: text.x, y: text.y }} onDrag={onDrag} bounds="parent">
+			<Draggable position={{ x: text.x, y: text.y }} onDrag={onDrag} bounds="parent" nodeRef={nodeRef}>
 				{textElement}
 			</Draggable>
 		);

@@ -99,7 +99,6 @@ export async function getMemes(token: string, page: number): Promise<GetMemesRes
 }
 
 export async function createMeme(token: string, formData: FormData): Promise<MemeResponse> {
-  console.log("Creating meme", formData);
   return await fetch(`${BASE_URL}/memes`, {
     method: 'POST',
     body: formData,

@@ -83,7 +83,6 @@ function CreateMemePage() {
       formData.append(`Texts[${index}][X]`, Math.ceil(text.x).toString());
       formData.append(`Texts[${index}][Y]`, Math.ceil(text.y).toString());
     });
-    console.log("Submitting form data", formData);
     mutate(formData);
   };
 
