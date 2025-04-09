@@ -2,7 +2,7 @@ import { Avatar, Box, Flex, Input, VStack, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CommentWithAuthor, createMemeComment } from "../../api";
+import { CommentWithAuthor, createMemeComment, GetMemeCommentsResponse, GetMemesResponse, MemeResponse } from "../../api";
 import { useAuthToken } from "../../contexts/authentication";
 import { useLoggedInUser } from "../../hooks/useLoggedInUser";
 import { Comment } from "./comment";
@@ -31,20 +31,7 @@ export const CommentSection: React.FC<{
 			const previousComments = queryClient.getQueryData(["comments", newComment.memeId]);
 
 			// optimistically update the comments in the cache
-			queryClient.setQueryData(["comments", newComment.memeId], (old: any) => {
-				return {
-					...old,
-					total: (old?.total || 0) + 1, // increment the total count of comments
-					results: [
-						{
-							content: newComment.content,
-							author: user,
-							createdAt: new Date().toISOString(),
-						},
-						...(old?.results || []),
-					],
-				}
-			});
+			queryClient.setQueryData(["comments", newComment.memeId], (old: GetMemeCommentsResponse) => buildNewCommentsForMeme(old, newComment));
 
 			// return the snapshot to rollback in case of an error
 			return { previousComments };
@@ -61,12 +48,31 @@ export const CommentSection: React.FC<{
 			});
 		},
 		onSettled: (newComment) => {
-			// refetch the comments to ensure the cache is up-to-date
 			if (newComment) {
+				// refetch the comments to ensure the cache is up-to-date
 				queryClient.invalidateQueries({ queryKey: ["comments", newComment.memeId] });
+				// also refetch the memes to update the comments count
+				// Note: this looks optimizable since all memes are refetched 
+				// I would like to refetch only the current meme but as I'm using an infinite query I cannot
+				queryClient.invalidateQueries({ queryKey: ["memes"] });
 			}
 		},
 	});
+
+	const buildNewCommentsForMeme = (old: GetMemeCommentsResponse, newComment: any) => {
+		return {
+			...old,
+			total: (old?.total || 0) + 1, // increment the total count of comments
+			results: [
+				{
+					content: newComment.content,
+					author: user,
+					createdAt: new Date().toISOString(),
+				},
+				...(old?.results || []),
+			],
+		}
+	}
 
 	const handleSubmit = (event: React.FormEvent) => {
 		event.preventDefault();

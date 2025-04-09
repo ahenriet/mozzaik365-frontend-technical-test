@@ -68,7 +68,7 @@ export type MemeResponse = {
   authorId: string;
   pictureUrl: string;
   description: string;
-  commentsCount: string;
+  commentsCount: number;
   texts: {
     content: string;
     x: number;
@@ -108,22 +108,13 @@ export async function createMeme(token: string, formData: FormData): Promise<Mem
   }).then(res => checkStatus(res).json());
 }
 
-
-export type MemeComment = {
-  id: string;
-  authorId: string;
-  memeId: string;
-  content: string;
-  createdAt: string;
-};
-
 export type GetMemeCommentsResponse = {
   total: number;
   pageSize: number;
-  results: MemeComment[]
+  results: CreateCommentResponse[]
 }
 
-export type CommentWithAuthor = MemeComment & { author: GetUserByIdResponse };
+export type CommentWithAuthor = CreateCommentResponse & { author: GetUserByIdResponse };
 
 /**
  * Get comments for a meme
