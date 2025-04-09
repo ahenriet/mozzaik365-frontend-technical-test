@@ -11,12 +11,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback } from "react";
 import {
   getMemes,
-  getUserById,
   GetUserByIdResponse,
   MemeResponse
 } from "../../api";
-import { Loader } from "../../components/loader";
 import { Meme } from "../../components/feed/meme";
+import { Loader } from "../../components/loader";
 import { useAuthToken } from "../../contexts/authentication";
 import { getCachedUserById } from "../../helpers/helper";
 
@@ -42,7 +41,7 @@ export const MemeFeedPage: React.FC = () => {
       const response = await getMemes(token, pageParam);
       if (!response) {
         throw new Error("Failed to fetch memes");
-      } 
+      }
       // fetch author for each meme in parallel and leverage Tanstack Query's cache
       const memesWithAuthors = await Promise.all(
         response.results.map(async (meme) => {
