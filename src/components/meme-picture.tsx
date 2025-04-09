@@ -2,7 +2,7 @@ import { Box, useDimensions } from "@chakra-ui/react";
 // useDimensions is deprecated but the recommended useSize is not intended for public usage 
 // https://www.npmjs.com/package/@chakra-ui/react-use-size/v/0.0.0-dev-20220922115811?activeTab=readme
 import { useMemo, useRef } from "react";
-import { DraggableText } from "./draggable-text";
+import { DraggableText } from "./editor/draggable-text";
 
 export type MemePictureProps = {
   pictureUrl: string;

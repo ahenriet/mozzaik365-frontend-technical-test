@@ -1,13 +1,12 @@
-import { Box, Flex, Avatar, Input, VStack, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Flex, Input, VStack, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 
-import { MemeComment, GetUserByIdResponse, createMemeComment } from "../api";
-import { Comment } from "./comment";
-import { useLoggedInUser } from "../hooks/useLoggedInUser";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthToken } from "../contexts/authentication";
+import { CommentWithAuthor, createMemeComment } from "../../api";
+import { useAuthToken } from "../../contexts/authentication";
+import { useLoggedInUser } from "../../hooks/useLoggedInUser";
+import { Comment } from "./comment";
 
-export type CommentWithAuthor = MemeComment & { author: GetUserByIdResponse };
 
 export const CommentSection: React.FC<{
 	memeId: string;
@@ -17,7 +16,6 @@ export const CommentSection: React.FC<{
 	const token = useAuthToken();
 	const queryClient = useQueryClient();
 	const toast = useToast();
-
 	const { user } = useLoggedInUser();
 
 	// add comment with optimistic updates

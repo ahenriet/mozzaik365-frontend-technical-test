@@ -1,6 +1,6 @@
 import { Flex, Avatar, Box, Text } from "@chakra-ui/react";
 import { format } from "timeago.js";
-import { CommentWithAuthor } from "./comment-section";
+import { CommentWithAuthor } from "../../api";
 
 export const Comment: React.FC<{
 	memeId: string;

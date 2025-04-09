@@ -123,6 +123,7 @@ export type GetMemeCommentsResponse = {
   results: MemeComment[]
 }
 
+export type CommentWithAuthor = MemeComment & { author: GetUserByIdResponse };
 
 /**
  * Get comments for a meme

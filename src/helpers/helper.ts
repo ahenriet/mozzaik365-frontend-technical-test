@@ -4,7 +4,7 @@ import { GetUserByIdResponse, getUserById } from "../api";
 /**
  * Fetches user by ID and caches the result using Tanstack Query.
  * If the user is already cached, it returns the cached user.
- * This helper allows to 
+ * This helper allows to leverage Tanstack Query's caching mechanism even when called in another hook.
  * @param queryClient - The Tanstack Query client instance.
  * @param token - The authentication token.
  * @param userId - The ID of the user to fetch.

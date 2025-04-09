@@ -1,5 +1,5 @@
 import { useDropzone } from "react-dropzone";
-import { MemePicture, MemePictureProps } from "./meme-picture";
+import { MemePicture, MemePictureProps } from "../meme-picture";
 import { AspectRatio, Box, Button, Flex, Icon, Text } from "@chakra-ui/react";
 import { Image, Pencil } from "@phosphor-icons/react";
 

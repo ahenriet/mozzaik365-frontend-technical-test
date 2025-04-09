@@ -17,11 +17,11 @@ import {
 	getMemeComments,
 	GetUserByIdResponse,
 	MemeResponse
-} from "../api";
-import { CommentSection } from "../components/comment-section";
-import { useAuthToken } from "../contexts/authentication";
-import { getCachedUserById } from "../helpers/helper";
-import { MemePicture } from "./meme-picture";
+} from "../../api";
+import { CommentSection } from "./comment-section";
+import { useAuthToken } from "../../contexts/authentication";
+import { getCachedUserById } from "../../helpers/helper";
+import { MemePicture } from "../meme-picture";
 
 type MemeWithAuthor = MemeResponse & {
 	author: GetUserByIdResponse;
@@ -50,7 +50,7 @@ export const Meme: React.FC<MemeWithAuthorProps> = ({ meme }) => {
 				}));
 			return { ...response, results: commentsWithAuthors };
 		},
-		enabled: !!openedCommentSection,  // load comments only when a comment section is opened
+		enabled: !!openedCommentSection,  // load comments only when the comment section is opened
 	});
 
 	return <VStack key={meme.id} p={4} width="full" align="stretch">

@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MemeEditor } from "../../components/meme-editor";
+import { MemeEditor } from "../../components/editor/meme-editor";
 import { useMemo, useState } from "react";
 import { MemePictureProps } from "../../components/meme-picture";
 import { Plus, Trash } from "@phosphor-icons/react";
@@ -48,9 +48,6 @@ function CreateMemePage() {
         duration: 3000,
         isClosable: true,
       });
-      // setPicture(null); TODO remove when redirection works
-      // setDescription("");
-      // setTexts([]);
       window.location.href = "/";
     },
     onError: (error: any) => {
@@ -91,7 +88,6 @@ function CreateMemePage() {
       url: URL.createObjectURL(file),
       file,
     });
-    // also reset the description and captions
     setDescription("");
     setTexts([]);
   };
@@ -111,7 +107,7 @@ function CreateMemePage() {
     setTexts(texts.filter((_, i) => i !== index));
   };
 
-  const handleTextChange = (text: string, index: number) => {
+  const handleTextContentChange = (text: string, index: number) => {
     const newTexts = [...texts];
     newTexts[index] = {
       ...newTexts[index],
@@ -178,7 +174,7 @@ function CreateMemePage() {
           <VStack>
             {texts.map((text, index) => (
               <Flex key={index} width="full">
-                <Input value={text.content} mr={1} onChange={e => handleTextChange(e.target.value, index)} />
+                <Input value={text.content} mr={1} onChange={e => handleTextContentChange(e.target.value, index)} />
                 <IconButton
                   onClick={() => handleDeleteCaptionButtonClick(index)}
                   aria-label="Delete caption"

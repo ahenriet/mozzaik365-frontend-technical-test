@@ -6,9 +6,9 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import {
   getMemes,
   getUserById,
@@ -16,8 +16,9 @@ import {
   MemeResponse
 } from "../../api";
 import { Loader } from "../../components/loader";
-import { Meme } from "../../components/meme";
+import { Meme } from "../../components/feed/meme";
 import { useAuthToken } from "../../contexts/authentication";
+import { getCachedUserById } from "../../helpers/helper";
 
 type MemeWithAuthor = MemeResponse & {
   author: GetUserByIdResponse;
@@ -26,43 +27,47 @@ type MemeWithAuthor = MemeResponse & {
 export const MemeFeedPage: React.FC = () => {
   const queryClient = useQueryClient();
   const token = useAuthToken();
-  const [page, setPage] = useState(1);
 
-  const getCachedUserById = async (userId: string): Promise<GetUserByIdResponse> => {
-    const cachedUser = queryClient.getQueryData<GetUserByIdResponse>(["user", userId]);
-
-    // fetch user only if not cached
-    return cachedUser ||
-      (await queryClient.fetchQuery({
-        queryKey: ["user", userId],
-        queryFn: () => getUserById(token, userId)
-      }
-      ));
-  }
-
-  // fetch memes with authors
-  const { isLoading, data: memesData, error } = useQuery({
-    queryKey: ["memes", page],
-    queryFn: async () => {
-      const response = await getMemes(token, page);
-
+  // fetch memes with authors using useInfiniteQuery
+  const {
+    data: memesData,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["memes"],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await getMemes(token, pageParam);
+      if (!response) {
+        throw new Error("Failed to fetch memes");
+      } 
       // fetch author for each meme in parallel and leverage Tanstack Query's cache
       const memesWithAuthors = await Promise.all(
         response.results.map(async (meme) => {
-          const author = await getCachedUserById(meme.authorId);
+          const author = await getCachedUserById(queryClient, token, meme.authorId);
           return { ...meme, author };
         })
       );
 
-      return { ...response, results: memesWithAuthors };
+      const totalPages = Math.ceil(response.total / response.pageSize);
+      return { ...response, results: memesWithAuthors, page: pageParam, totalPages: totalPages };
     },
+    getNextPageParam: (lastPage: { page: number; totalPages: number }) => {
+      const nextPage = lastPage.page + 1;
+      return nextPage <= lastPage.totalPages ? nextPage : undefined;
+    },
+    initialPageParam: 1,
   });
 
   const handleLoadMore = useCallback(() => {
-    setPage(page + 1);
-  }, []);
+    if (hasNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, fetchNextPage]);
 
-  if (isLoading && !memesData) {
+  if (isFetching && !memesData) {
     return <Loader data-testid="meme-feed-loader" />;
   }
 
@@ -82,14 +87,21 @@ export const MemeFeedPage: React.FC = () => {
         maxWidth={800}
         divider={<StackDivider border="gray.200" />}
       >
-        {memesData?.results.map((meme: MemeWithAuthor) => <Meme key={meme.id} meme={meme} />)}
-        {memesData && memesData.total > memesData.results.length && (
-          <Button onClick={handleLoadMore} colorScheme="blue" mt={4}>
+        {memesData?.pages.map((page) =>
+          page.results.map((meme: MemeWithAuthor) => <Meme key={meme.id} meme={meme} />)
+        )}
+        {hasNextPage && (
+          <Button
+            onClick={handleLoadMore}
+            colorScheme="blue"
+            mt={4}
+            isLoading={isFetchingNextPage}
+          >
             Load More
           </Button>
         )}
       </VStack>
-    </Flex >
+    </Flex>
   );
 };
 
