@@ -1,8 +1,7 @@
-import { Avatar, Box, Flex, Input, VStack, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Flex, Input, useToast, VStack } from "@chakra-ui/react";
 import { useState } from "react";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CommentWithAuthor, createMemeComment, GetMemeCommentsResponse, GetMemesResponse, MemeResponse } from "../../api";
+import { CommentWithAuthor, createMemeComment, GetMemeCommentsResponse } from "../../api";
 import { useAuthToken } from "../../contexts/authentication";
 import { useLoggedInUser } from "../../hooks/useLoggedInUser";
 import { Comment } from "./comment";
@@ -59,17 +58,17 @@ export const CommentSection: React.FC<{
 		},
 	});
 
-	const buildNewCommentsForMeme = (old: GetMemeCommentsResponse, newComment: any) => {
+	const buildNewCommentsForMeme = (previousComments: GetMemeCommentsResponse, newComment: any) => {
 		return {
-			...old,
-			total: (old?.total || 0) + 1, // increment the total count of comments
+			...previousComments,
+			total: (previousComments?.total || 0) + 1, // increment the total count of comments
 			results: [
 				{
 					content: newComment.content,
 					author: user,
 					createdAt: new Date().toISOString(),
 				},
-				...(old?.results || []),
+				...(previousComments?.results || []),
 			],
 		}
 	}

@@ -21,3 +21,14 @@ export const getCachedUserById = async (queryClient: QueryClient, token: string,
 		}
 		));
 }
+
+/**
+ * Formats a date to the user's local timezone.
+ * This is a workaround since timeago.js does not support timezone formatting.
+ * @param dateAsString - The stringified date to format.
+ * @returns The formatted date.
+ */
+export const formatDateToLocalTimezone = (dateAsString: string): Date => {
+	const date = new Date(dateAsString);
+	return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+}

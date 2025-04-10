@@ -20,7 +20,7 @@ import {
 } from "../../api";
 import { CommentSection } from "./comment-section";
 import { useAuthToken } from "../../contexts/authentication";
-import { getCachedUserById } from "../../helpers/helper";
+import { formatDateToLocalTimezone, getCachedUserById } from "../../helpers/helper";
 import { MemePicture } from "../meme-picture";
 
 type MemeWithAuthor = MemeResponse & {
@@ -66,10 +66,10 @@ export const Meme: React.FC<MemeWithAuthorProps> = ({ meme }) => {
 				<Text ml={2} data-testid={`meme-author-${meme.id}`}>{meme.author.username}</Text>
 			</Flex>
 			<Text fontStyle="italic" color="gray.500" fontSize="small">
-				{format(meme.createdAt)}
+				{format(formatDateToLocalTimezone(meme.createdAt))}
 			</Text>
 		</Flex>
-		<MemePicture pictureUrl={meme.pictureUrl} texts={meme.texts} dataTestId={`meme-picture-${meme.id}`} />
+		<MemePicture pictureUrl={meme.pictureUrl} texts={meme.texts} isDraggable={false} dataTestId={`meme-picture-${meme.id}`} />
 		<Box>
 			<Text fontWeight="bold" fontSize="medium" mb={2}>
 				Description:{" "}
