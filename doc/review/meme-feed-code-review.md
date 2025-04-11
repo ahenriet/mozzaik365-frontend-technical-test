@@ -14,7 +14,7 @@ From a business point of view it's not needed because the user can only see a fe
 From a technical point of view, it causes performance issues making the app unusable because too many requests are sent to the API.
 Also, the API provides a pagination feature that the UI doesn't take advantage of.
 
-2. All memes and comments are fetched in sequence (`await` everywhere...), that is why the page takes a very long time to load.
+2. Memes, comments and users are fetched in sequence (`await` everywhere...), that is why the page takes a very long time to load.
 
 3. A lot of data is fetched multiple times, like if a given user is the author of n comments, it is fetched n times from the API. Again, we should leverage the cache here. 
 
@@ -61,4 +61,4 @@ Now, when a comment is added, it is optimistically updated in the cache of the q
 
 ### Nice-to-have feature
 I added error toasts for when a comment creation fails and when a meme creation fails.
-I also added a success toast on meme creation (very nice-to-have but costs almost zero).
+I also added a warning toast when trying to create a meme without a picture or a description, and a success toast on meme creation (very nice-to-have but costs almost zero).
