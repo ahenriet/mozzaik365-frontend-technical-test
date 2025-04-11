@@ -27,7 +27,7 @@ export const MemeFeedPage: React.FC = () => {
   const queryClient = useQueryClient();
   const token = useAuthToken();
 
-  // fetch memes with authors using useInfiniteQuery
+  // fetch memes with authors page by page
   const {
     data: memesData,
     error,
@@ -51,7 +51,12 @@ export const MemeFeedPage: React.FC = () => {
       );
 
       const totalPages = Math.ceil(response.total / response.pageSize);
-      return { ...response, results: memesWithAuthors, page: pageParam, totalPages: totalPages };
+      return {
+        ...response,
+        results: memesWithAuthors,
+        page: pageParam,
+        totalPages: totalPages
+      };
     },
     getNextPageParam: (lastPage: { page: number; totalPages: number }) => {
       const nextPage = lastPage.page + 1;
@@ -79,7 +84,7 @@ export const MemeFeedPage: React.FC = () => {
   }
 
   return (
-    <Flex width="full" height="full" justifyContent="center" overflowY="auto">
+    <Flex width="full" height="full" justifyContent="center" overflowY="auto" >
       <VStack
         p={4}
         width="full"
@@ -93,10 +98,11 @@ export const MemeFeedPage: React.FC = () => {
           <Button
             onClick={handleLoadMore}
             colorScheme="blue"
-            mt={4}
+            marginTop={2}
+            padding={4}
             isLoading={isFetchingNextPage}
           >
-            Load More
+            Load more
           </Button>
         )}
       </VStack>

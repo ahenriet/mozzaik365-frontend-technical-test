@@ -5,6 +5,7 @@ import { CommentWithAuthor, createMemeComment, GetMemeCommentsResponse } from ".
 import { useAuthToken } from "../../contexts/authentication";
 import { useLoggedInUser } from "../../hooks/useLoggedInUser";
 import { Comment } from "./comment";
+import { convertDateToUTC } from "../../helpers/helper";
 
 
 export const CommentSection: React.FC<{
@@ -30,7 +31,7 @@ export const CommentSection: React.FC<{
 			const previousComments = queryClient.getQueryData(["comments", newComment.memeId]);
 
 			// optimistically update the comments in the cache
-			queryClient.setQueryData(["comments", newComment.memeId], (old: GetMemeCommentsResponse) => buildNewCommentsForMeme(old, newComment));
+			queryClient.setQueryData(["comments", newComment.memeId], (old: GetMemeCommentsResponse) => createNewComment(old, newComment));
 
 			// return the snapshot to rollback in case of an error
 			return { previousComments };
@@ -58,7 +59,7 @@ export const CommentSection: React.FC<{
 		},
 	});
 
-	const buildNewCommentsForMeme = (previousComments: GetMemeCommentsResponse, newComment: any) => {
+	const createNewComment = (previousComments: GetMemeCommentsResponse, newComment: any) => {
 		return {
 			...previousComments,
 			total: (previousComments?.total || 0) + 1, // increment the total count of comments
@@ -66,7 +67,7 @@ export const CommentSection: React.FC<{
 				{
 					content: newComment.content,
 					author: user,
-					createdAt: new Date().toISOString(),
+					createdAt: convertDateToUTC(new Date()),
 				},
 				...(previousComments?.results || []),
 			],

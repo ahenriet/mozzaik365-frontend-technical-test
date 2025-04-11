@@ -49,15 +49,9 @@ describe("routes/_authentication/index", () => {
         const text1 = screen.getByTestId("meme-picture-dummy_meme_id_1-text-0");
         const text2 = screen.getByTestId("meme-picture-dummy_meme_id_1-text-1");
         expect(text1).toHaveTextContent('dummy text 1');
-        expect(text1).toHaveStyle({
-          'top': '0px',
-          'left': '0px',
-        });
+        expect(text1).toHaveStyle({ 'transform': 'translate(0px,0px)' });
         expect(text2).toHaveTextContent('dummy text 2');
-        expect(text2).toHaveStyle({
-          'top': '100px',
-          'left': '100px',
-        });
+        expect(text2).toHaveStyle({ 'transform': 'translate(100px,100px)' });
 
         // We check that the right description is displayed
         expect(screen.getByTestId("meme-description-dummy_meme_id_1")).toHaveTextContent('dummy meme 1');

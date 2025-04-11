@@ -32,3 +32,12 @@ export const formatDateToLocalTimezone = (dateAsString: string): Date => {
 	const date = new Date(dateAsString);
 	return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
 }
+
+/**
+ * Converts a date to UTC by adding the timezone offset.
+ * @param date - The date to convert.
+ * @returns the Date object in UTC.
+ */
+export const convertDateToUTC = (date: Date): Date => {
+	return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+}

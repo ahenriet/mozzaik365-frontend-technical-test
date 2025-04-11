@@ -63,11 +63,23 @@ function CreateMemePage() {
 
   const handleSubmit = async () => {
     if (!picture) {
-      alert("Please upload a picture before submitting.");
+      toast({
+        title: "Missing picture",
+        description: "Please upload a picture before submitting.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
-    if (description.length === 0) {
-      alert("Please add a description before submitting.");
+    if (!description) {
+      toast({
+        title: "Missing description",
+        description: "Please add a description before submitting.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 

@@ -10,33 +10,29 @@ export const DraggableText: React.FC<{
 	dataTestId: string;
 }> = ({ text, fontSize, isDraggable = true, onDrag, dataTestId }) => {
 	const nodeRef = useRef(null);
-	const textElement = (
-		<Text
-			position="absolute"
-			fontSize={fontSize}
-			color="white"
-			fontFamily="Impact"
-			fontWeight="bold"
-			userSelect="none"
-			textTransform="uppercase"
-			style={{ WebkitTextStroke: "1px black", cursor: isDraggable ? "move" : "default" }}
-			ref={nodeRef}
-		>
-			{text.content}
-		</Text>
-	);
-
-	if (isDraggable) {
-		return (
-			<Draggable position={{ x: text.x, y: text.y }} onDrag={onDrag} bounds="parent" nodeRef={nodeRef}>
-				{textElement}
-			</Draggable>
-		);
-	}
 
 	return (
-		<Box position="absolute" left={`${text.x}px`} top={`${text.y}px`} data-testid={dataTestId}>
-			{textElement}
-		</Box>
+		<Draggable
+			disabled={!isDraggable}
+			position={{ x: text.x, y: text.y }}
+			onDrag={onDrag}
+			bounds="parent"
+			nodeRef={nodeRef} >
+			<Text
+				position="absolute"
+				fontSize={fontSize}
+				color="white"
+				fontFamily="Impact"
+				fontWeight="bold"
+				userSelect="none"
+				textTransform="uppercase"
+				style={{ WebkitTextStroke: "1px black", cursor: isDraggable ? "move" : "default" }}
+				ref={nodeRef}
+				data-testid={dataTestId}
+			>
+				{text.content}
+			</Text>
+		</Draggable>
 	);
+
 };
